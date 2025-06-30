@@ -1,0 +1,43 @@
+# This is an example workflow to demonstrate how to integrate the AI Code Reviewer Agent.
+# You will need to create a corresponding script (e.g., ./scripts/run_ai_review.sh)
+# and manage your API keys as secrets in your repository settings.
+
+name: AI Code Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup AI Environment
+        # (e.g., install gemini-cli, setup API keys via secrets)
+        run: |
+          echo "Setting up environment..."
+          # Your setup commands here
+      - name: Run AI Review Script
+        id: ai-review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+        run: |
+          # This script would:
+          # 1. Gets the PR content to find the code and the PRD link.
+          # 2. Reads the system prompt from prompts/review/system_prompt_code_reviewer.md
+          # 3. Calls the AI API with the prompt, PRD, and code.
+          # 4. Writes the AI's response to a file, e.g., review.md
+          # ./scripts/run_ai_review.sh (This script needs to be created by the user)
+      - name: Post Review Comment to PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('review.md', 'utf8');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: review
+            });
